@@ -1,0 +1,136 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light, warm background + pastel black foreground (#1D1C1A) */
+    --background: 24 30% 97%;
+    --foreground: 38 8% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 38 8% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 38 8% 11%;
+
+    /* Pastel red primary (#FF746C), slightly softened saturation */
+    --primary: 3 88% 71%;
+    --primary-foreground: 0 0% 100%;
+
+    /* When we need \"black\" surfaces, use pastel black */
+    --secondary: 38 8% 11%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 24 16% 94%;
+    --muted-foreground: 0 0% 40%;
+
+    /* Very light accent background, reduced overall red usage */
+    --accent: 12 40% 96%;
+    --accent-foreground: 3 70% 50%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 24 16% 92%;
+    --input: 24 16% 92%;
+    --ring: 3 88% 71%;
+
+    --radius: 1rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Custom tokens — softer, HIG‑style shadows and status colors */
+    --glass-bg: 0 0% 100% / 0.7;
+    --glass-border: 0 0% 100% / 0.5;
+    --glass-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.035);
+    --status-ok: 145 55% 42%;
+    --status-low: 3 78% 60%;
+    --status-ok-bg: 145 45% 94%;
+    --status-low-bg: 3 90% 96%;
+
+    font-family: 'DM Sans', sans-serif;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply rounded-2xl border;
+    background: hsla(var(--glass-bg));
+    border-color: hsla(var(--glass-border));
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .glass-card-solid {
+    @apply rounded-2xl bg-card border border-border;
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* AilaBank-style: cards almost lost with background — very subtle */
+  .card-subtle {
+    @apply rounded-2xl border;
+    background: hsl(0 8% 97.5%);
+    border-color: hsl(0 5% 94%);
+    box-shadow: 0 1px 1px hsl(0 0% 0% / 0.02);
+  }
+
+  .status-badge {
+    @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold;
+  }
+
+  .status-badge-low {
+    background: hsl(var(--status-low-bg));
+    color: hsl(var(--status-low));
+  }
+
+  .status-badge-ok {
+    background: hsl(var(--status-ok-bg));
+    color: hsl(var(--status-ok));
+  }
+
+  .status-badge-high {
+    background: hsl(38 90% 95%);
+    color: hsl(25 90% 45%);
+  }
+
+  .status-badge-on-track {
+    background: hsl(0 0% 94%);
+    color: hsl(0 0% 40%);
+  }
+
+  .bottom-safe-area {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 6px);
+  }
+}
+
+@layer utilities {
+  .text-display {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}

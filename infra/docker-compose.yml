@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: infra/Dockerfile.backend
+    container_name: cgd_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ..:/app
+      - backend_uploads:/app/uploads
+    env_file:
+      - ../.env
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ../apps/frontend
+      dockerfile: ../../infra/Dockerfile.frontend
+    container_name: cgd_frontend
+    ports:
+      - "8080:8080"
+    environment:
+      - VITE_API_URL=http://192.168.1.233:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  backend_uploads:

@@ -1,0 +1,59 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Environment
+.env
+*.env.local
+
+# Database
+*.db
+*.sqlite3
+
+# Uploaded meal photos
+uploads/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+
+# macOS
+.DS_Store
+.AppleDouble
+
+# Node / Next.js
+apps/frontend/node_modules/
+apps/frontend/.next/
+apps/frontend/out/
+apps/frontend/.env.local
+apps/frontend/.env*.local
+
+# Next.js PWA generated service worker files
+apps/frontend/public/sw.js
+apps/frontend/public/sw.js.map
+apps/frontend/public/workbox-*.js
+apps/frontend/public/workbox-*.js.map
+
+# Docker
+infra/.docker-data/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ollama model cache (if stored locally in project)
+models/qwen/
+models/gpt_oss/
