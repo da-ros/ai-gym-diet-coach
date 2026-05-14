@@ -137,8 +137,8 @@ The product prioritizes **automation, accuracy, and adherence** over exhaustive 
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/da-ros/CoachGymDiet.git
-cd CoachGymDiet
+git clone https://github.com/da-ros/ai-gym-diet-coach.git
+cd ai-gym-diet-coach
 ```
 
 ### 2. Backend (Python)
@@ -276,7 +276,7 @@ Scripts are also in `data/migrations/` (e.g. `add_dish_name_to_meals.sql`, `add_
 ## Project structure
 
 ```
-CoachGymDiet/
+ai-gym-diet-coach/
 ├── apps/
 │   ├── mcp_server/           # FastAPI backend
 │   │   ├── main.py
