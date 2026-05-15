@@ -1,6 +1,8 @@
-# FuelCoach (CoachGymDiet)
+# FuelCoach
 
 **AI dietary coach for gym goers.** Log meals by photo, track macros and protein timing, and get evidence-based nudges to hit 3–4 protein spikes and recover better.
+
+**See demo and full case study:** [pedrorodas.com/#projects](https://pedrorodas.com/#projects)
 
 ---
 
@@ -59,27 +61,62 @@ The product prioritizes **automation, accuracy, and adherence** over exhaustive 
 
 ## Architecture
 
-### High-level flow
+The system splits into four layers: a **React PWA** in the browser, a **FastAPI** API, **Supabase** for auth and PostgreSQL, and **LangGraph + agents** backed by the **Anthropic API**.
+
+![System architecture](./CoachGymDiet-architecture-light.png)
+
+**Frontend (React PWA)** — Pages for auth, dashboard, meal logging, chat, and profile. `lib/supabase.ts` handles sign-in; `lib/api.ts` calls the backend with a Bearer JWT. TanStack Query manages server state.
+
+**Backend (FastAPI)** — Routes for meals, summaries, chat, and profile. `auth.py` verifies the Supabase JWT (`sub` → `user_id`). SQLAlchemy reads/writes Postgres; meal photos are stored under `/uploads`.
+
+**Supabase** — Email/password auth issues access tokens; PostgreSQL holds `user_profiles`, `meals`, and `daily_logs`.
+
+**Orchestration & agents** — `POST /meals` triggers `run_meal_flow()` (LangGraph). `vision_agent` and `nutrition_agent` run the meal pipeline; `mps_agent` handles nudges and chat. **Claude Sonnet** powers vision; **Claude Haiku** powers nutrition estimates, coaching, and chat.
+
+### LangGraph meal logging DAG
+
+When the user uploads a photo via **`POST /meals`**, the backend runs **`run_meal_flow()`** in `workflows/graphs/meal_flow.py`. State is carried in **`MealFlowState`** (`workflows/state.py`) from node to node.
 
 ```
-[PWA Frontend (React/Vite)]
-         │
-         ▼
-[FastAPI backend]
-         │
-         ├── POST /meals (photo) ──► LangGraph meal flow
-         │         │
-         │         ├── vision_node      (Claude Sonnet: foods + dish name)
-         │         ├── nutrition_node   (Claude Haiku: macros + micros)
-         │         ├── update_context_node (persist Meal + DailyLog; protein spikes)
-         │         └── coaching_node    (optional: Claude Haiku nudge)
-         │
-         ├── GET /daily-summary  ──► Profile + DailyLog + today’s meals
-         ├── GET /profile        ──► User profile (goal, weight, targets)
-         ├── PUT /profile        ──► Update goal, body_weight_kg, targets
-         ├── POST /chat          ──► Daily context + timeline + history → Claude Haiku
-         └── GET /meals/:id      ──► Single meal detail
+              POST /meals (image upload)
+                       │
+                       ▼
+          ┌────────────────────────┐
+          │      vision_node       │
+          └───────────┬────────────┘
+                      ▼
+          ┌────────────────────────┐
+          │     nutrition_node     │
+          └───────────┬────────────┘
+                      ▼
+          ┌────────────────────────┐
+          │  update_context_node   │
+          └───────────┬────────────┘
+                      ▼
+          ┌────────────────────────┐
+          │     should_coach?      │
+          └───────────┬────────────┘
+                      │
+        ┌─────────────┴─────────────┐
+     yes│                           │no
+        ▼                           ▼
+  ┌────────────────────────┐      END
+  │     coaching_node      │
+  └───────────┬────────────┘
+              ▼
+             END
 ```
+
+| Step | Node | What it does |
+|------|------|----------------|
+| 1 | **Image upload** | FastAPI saves the photo, passes `image_bytes` + `user_id` into the graph. |
+| 2 | **`vision_node`** | Claude (vision) identifies foods, portions, and a dish name from the image. |
+| 3 | **`nutrition_node`** | Claude (text) estimates macros (calories, protein, carbs, fats) and micros (fiber, sodium, potassium) from the food list. |
+| 4 | **`update_context_node`** | Persists a **`Meal`** row, rolls totals into today’s **`DailyLog`**, flags protein spikes (≥ `PROTEIN_SPIKE_THRESHOLD_G`), and sets `protein_spike_detected` / `deficiency_detected`. |
+| 5 | **`should_coach?`** | Conditional edge: if a spike was logged or a micro deficiency heuristic fired, continue; otherwise the graph ends. |
+| 6 | **`coaching_node`** | Claude (text) generates a short, evidence-based nudge from profile + daily log; saved on the meal as `nudge`. |
+
+Chat (`POST /chat`) is **outside** this DAG: it uses the same daily context and MPS timeline but does not re-run vision or nutrition.
 
 ### Backend layout
 
@@ -340,3 +377,15 @@ All authenticated routes expect `Authorization: Bearer <access_token>` (Supabase
 ## License
 
 MIT.
+
+---
+
+## Learn more
+
+See demo and full case study: [pedrorodas.com/#projects](https://pedrorodas.com/#projects)
+
+---
+
+## Disclaimer
+
+Nutrition estimates from photos are approximate. The system is designed for behavioral guidance, not clinical precision.
